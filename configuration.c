@@ -65,7 +65,7 @@ int configuration(cfg_t **cfg, int argc, char *argv[])  {
 	return 0;
 }
 
-void cleanup(cfg_t **cfg)  {
+void conf_cleanup(cfg_t **cfg)  {
 	cfg_free(*cfg);
 	
 	if(conf_host != NULL)	free(conf_host);

@@ -13,5 +13,6 @@ int configuration(cfg_t **cfg, int argc, char *argv[]);
 void init_cfg(cfg_t **cfg);
 int parse_conf_file(cfg_t **cfg);
 int parse_argv(cfg_t **cfg);
+void conf_cleanup(cfg_t **cfg);
 
 #endif

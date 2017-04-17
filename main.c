@@ -3,11 +3,11 @@
 #include "connection.h"
 
 int main(int argc, char *argv[])  {
-	conf_t conf = {0};
+	cfg_t conf = {0};
 
-	conf = configuration(argc, argv);
-	if(conf == 0)  {
+	if(configuration(&conf, argc, argv) < 0 {
 		fprintf(stderr, "[!] error with configuration\n");
+		conf_cleanup(&conf);
 		exit(-1);
 	}
 	
@@ -15,5 +15,6 @@ int main(int argc, char *argv[])  {
 	
 	admin_cli();
 	
+	conf_cleanup(&conf);
 	exit(0);
 }
