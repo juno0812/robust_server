@@ -1,20 +1,20 @@
-#include "common.h"
+#include <stdlib.h>
 #include "configuration.h"
-#include "connection.h"
+//#include "connection.h"
 
 int main(int argc, char *argv[])  {
-	cfg_t conf = {0};
+	cfg_t *cfg;
 
-	if(configuration(&conf, argc, argv) < 0 {
+	if(configuration(&cfg, argc, argv) < 0)  {
 		fprintf(stderr, "[!] error with configuration\n");
-		conf_cleanup(&conf);
+		conf_cleanup(&cfg);
 		exit(-1);
 	}
 	
-	dispatch_connections(conf);
+	//dispatch_connections(conf);
 	
-	admin_cli();
+	//admin_cli();
 	
-	conf_cleanup(&conf);
+	conf_cleanup(&cfg);
 	exit(0);
 }
