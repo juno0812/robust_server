@@ -1,0 +1,3 @@
+[submodule "lib/libconfuse"]
+	path = lib/libconfuse
+	url = https://github.com/martinh/libconfuse.git
