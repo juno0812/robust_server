@@ -8,18 +8,34 @@
 
 #include "configuration.h"
 
-void init_cfg(cfg_t **cfg)  {
+int configuration(cfg_t *cfg, int argc, char *argv[])  {
+	cfg_t cfg_copy;
 	
-	cfg_opt_t opts[] = {
-		CFG_SIMPLE_STR("host", &conf_host),
-		CFG_INT("port", conf_port, CFGF_NONE),
-		CFG_END()
-	};
+	init_cfg(&cfg_copy);
 	
-	*cfg = cfg_init(opts, 0);
+	if(parse_conf_file(&cfg_copy) < 0)  {
+		*cfg = cfg_copy;
+		return -1;
+	}
+	
+	if(parse_argv(&cfg_copy, argc, argv) < 0)  {
+		*cfg = cfg_copy;
+		return -1;
+	}
+
+	printf("[>] configuration:\n");
+	cfg_print(cfg_copy, stdout);
+	
+	*cfg = cfg_copy;
+	return 0;
 }
 
-int parse_conf_file(cfg_t **cfg)  {
+void init_cfg(cfg_t *cfg)  {
+	cfg.host = DEFAULT_HOST;
+	cfg.port = DEFAULT_PORT;
+}
+
+int parse_conf_file(cfg_t *cfg)  {
 	int fd = -1;
 
 	/* try the conf file */
@@ -36,11 +52,13 @@ int parse_conf_file(cfg_t **cfg)  {
 	
 	printf("[>] reading from conf file\n");
 	
-	cfg_parse(*cfg, CONF_FILENAME);
+	/* Begin parsing file */
+	
+	
 	return 0;
 }
 
-int parse_argv(cfg_t **cfg, int argc, char *argv[])  {
+int parse_argv(cfg_t *cfg, int argc, char *argv[])  {
 	int option = 0;
 
 	while((option = getopt(argc, argv, "p:h:")) != -1)  {
@@ -63,28 +81,6 @@ int parse_argv(cfg_t **cfg, int argc, char *argv[])  {
 
 void print_usage(char *bin)  {
 	printf("[!] Usage: %s [-h <interface>] [-p <port>]\n", bin);
-}
-
-int configuration(cfg_t **cfg, int argc, char *argv[])  {
-	cfg_t *cfg_copy;
-	
-	init_cfg(&cfg_copy);
-	
-	if(parse_conf_file(&cfg_copy) < 0)  {
-		*cfg = cfg_copy;
-		return -1;
-	}
-	
-	if(parse_argv(&cfg_copy, argc, argv) < 0)  {
-		*cfg = cfg_copy;
-		return -1;
-	}
-
-	printf("[>] configuration:\n");
-	cfg_print(cfg_copy, stdout);
-	
-	*cfg = cfg_copy;
-	return 0;
 }
 
 void conf_cleanup(cfg_t **cfg)  {

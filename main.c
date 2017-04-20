@@ -3,7 +3,7 @@
 //#include "connection.h"
 
 int main(int argc, char *argv[])  {
-	cfg_t *cfg;
+	cfg_t cfg;
 
 	if(configuration(&cfg, argc, argv) < 0)  {
 		fprintf(stderr, "[!] error with configuration\n");
