@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdio.h>
+
 #include "configuration.h"
 //#include "connection.h"
 
@@ -11,6 +13,7 @@ int main(int argc, char *argv[])  {
 		exit(-1);
 	}
 	
+	printf("in main: %s %d\n", cfg.host, cfg.port);
 	//dispatch_connections(conf);
 	
 	//admin_cli();
