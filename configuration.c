@@ -66,7 +66,7 @@ int parse_conf_file(cfg_t *cfg)  {
 	printf("[>] reading from conf file\n");
 	
 	/* Begin parsing file */
-	while((line_ret = get_line(fd, line)) > 0)  {
+	while((line_ret = get_line(fd, &line)) > 0)  {
 		printf("poop\n");
 		if(line == NULL)  {
 			/* empty line */
@@ -80,11 +80,18 @@ int parse_conf_file(cfg_t *cfg)  {
 		}
 		printf("snot\n");
 
-		if(get_key_value(line, key, value) < 0)  {
+		if(get_key_value(line, &key, &value) < 0)  {
 			fprintf(stderr, "[!] syntax issue in conf file\n");
 			free(line);
-			if(key != NULL)	free(key);
-			if(value != NULL)	free(key);
+			line = NULL;
+			if(key != NULL)  {
+				free(key);
+				key = NULL;
+			}
+			if(value != NULL)  {
+				free(key);
+				key = NULL;
+			}
 			close(fd);
 			return -1;
 		}
@@ -93,10 +100,10 @@ int parse_conf_file(cfg_t *cfg)  {
 
 		if(strcmp(key, "host") == 0)  {
 			if(cfg->host == NULL)  {
-				cfg->host = malloc(strlen(value) * sizeof(char) + 1);
+				(*cfg).host = malloc(strlen(value) * sizeof(char) + 1);
 			}
 			else  {
-				cfg->host = realloc(cfg->host, strlen(value) * sizeof(char) + 1);
+				(*cfg).host = realloc(cfg->host, strlen(value) * sizeof(char) + 1);
 			}
 			strcpy(cfg->host, value);
 		}
@@ -108,16 +115,32 @@ int parse_conf_file(cfg_t *cfg)  {
 		else  {
 			fprintf(stderr, "[!] unknown conf key \"%s\"", key);
 			free(line);
-			if(key != NULL)	free(key);
-			if(value != NULL)	free(value);
+			line = NULL;
+			if(key != NULL)  {
+				free(key);
+				key = NULL;
+			}
+			if(value != NULL)  {
+				free(value);
+				value = NULL;
+			}
 			close(fd);
 			return -1;
 		}
 	}
 
-	if(line != NULL)	free(line);
-	if(key != NULL)	free(key);
-	if(value != NULL)	free(value);
+	if(line != NULL)  {
+		free(line);
+		line = NULL;
+	}
+	if(key != NULL)  {
+		free(key);
+		key = NULL;
+	}
+	if(value != NULL)  {
+		free(value);
+		value = NULL;
+	}
 
 	close(fd);
 
@@ -130,12 +153,15 @@ int parse_conf_file(cfg_t *cfg)  {
 	return 0;
 }
 
-int get_line(int fd, char *line)  {
+int get_line(int fd, char **line)  {
 	off_t curr = -1;
 	int line_len = 0;
 	char c;
 
-	if(line != NULL)	free(line);
+	if(*line != NULL)  {
+		free(*line);
+		*line = NULL;
+	}
 
 	curr = lseek(fd, 0, SEEK_CUR);
 	printf("current pos = %lld\n", curr);
@@ -154,11 +180,11 @@ int get_line(int fd, char *line)  {
 		return 0;
 	}
 
-	&(*line) = malloc(line_len * sizeof(char) + 1);
+	*line = malloc(line_len * sizeof(char) + 1);
 	lseek(fd, curr, SEEK_SET);
-	read(fd, &(*line), line_len);
+	read(fd, *line, line_len);
 
-	printf("line = %s\n", line);
+	printf("line = %s\n", *line);
 
 	while(read(fd, &c, 1) > 0)  {
 		if(isspace(c) == 0)  {
@@ -170,11 +196,17 @@ int get_line(int fd, char *line)  {
 	return line_len;
 }
 
-int get_key_value(char *line, char *key, char *value)  {
+int get_key_value(char *line, char **key, char **value)  {
 	int equal_pos = 0;
 
-	if(key != NULL)	free(key);
-	if(value != NULL)	free(value);
+	if(*key != NULL)  {
+		free(*key);
+		*key = NULL;
+	}
+	if(*value != NULL)  {
+		free(*value);
+		*value = NULL;
+	}
 
 	/* get the key */
 	for(equal_pos=0; equal_pos<strlen(line); equal_pos++)  {
@@ -186,14 +218,14 @@ int get_key_value(char *line, char *key, char *value)  {
 		return -1;
 	}
 
-	key = malloc(equal_pos * sizeof(char) + 1);
-	memset(key, 0, equal_pos * sizeof(char) + 1);
-	memcpy(key, line, equal_pos);
+	*key = malloc(equal_pos * sizeof(char) + 1);
+	memset(*key, 0, equal_pos * sizeof(char) + 1);
+	memcpy(*key, line, equal_pos);
 
 	/* now get the value */
 	equal_pos++;
-	value = malloc(strlen(line + equal_pos) + 1);
-	strcpy(value, line + equal_pos);
+	*value = malloc(strlen(line + equal_pos) + 1);
+	strcpy(*value, line + equal_pos);
 
 	return equal_pos;
 }
@@ -230,5 +262,8 @@ void print_usage(char *bin)  {
 }
 
 void conf_cleanup(cfg_t *cfg)  {
-	if(cfg->host != NULL)	free(cfg->host);
+	if((*cfg).host != NULL)  {
+		free((*cfg).host);
+		(*cfg).host = NULL;
+	}
 }
